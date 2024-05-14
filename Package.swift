@@ -20,10 +20,15 @@ let package = Package(
             targets: ["PrefireTestsPlugin"]
         ),
     ],
+    dependencies: [
+        .package(path: "./PrefireMacros")
+    ],
     targets: [
         .target(
             name: "Prefire",
-            dependencies: []
+            dependencies: [
+                "PrefireMacros"
+            ]
         ),
         .plugin(
             name: "PrefirePlaybookPlugin",
@@ -48,6 +53,6 @@ let package = Package(
         .binaryTarget(
             name: "PrefireSourcery",
             path: "PrefireExecutable/Binaries/PrefireSourcery.artifactbundle"
-        ),
+        )
     ]
 )
