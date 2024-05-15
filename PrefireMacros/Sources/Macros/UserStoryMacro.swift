@@ -14,19 +14,40 @@ public struct UserStoryMacro: MemberMacro {
             throw MacroError.macroAppliedToUnsupportedDeclaration
         }
 
-        guard let userStory = structDeclaration.attributes.first?
+        let labeledExprListSyntax = structDeclaration.attributes.first?
             .as(AttributeSyntax.self)?.arguments?
             .as(LabeledExprListSyntax.self)?.first?.expression
+
+        let userStoryStringLiteral = labeledExprListSyntax?
             .as(StringLiteralExprSyntax.self)?.segments.first?
-            .as(StringSegmentSyntax.self)?.content.text else {
-            throw MacroError.macroArgumentCannotBeEmpty
+            .as(StringSegmentSyntax.self)?.content.text
+
+        let memberAccessExprSyntax = labeledExprListSyntax?
+            .as(MemberAccessExprSyntax.self)
+
+        let propertyBase = memberAccessExprSyntax?.base?
+            .as(DeclReferenceExprSyntax.self)?.baseName.text
+
+        let propertySign = memberAccessExprSyntax?.period.text
+
+        let propertyName = memberAccessExprSyntax?.declName
+            .as(DeclReferenceExprSyntax.self)?.baseName.text
+
+        let userStoryStaticProperty = [propertyBase, propertySign, propertyName].compactMap { $0 }.joined()
+
+        let userStory: String
+
+        if let userStoryStringLiteral, !userStoryStringLiteral.isEmpty {
+            userStory = "\"\(userStoryStringLiteral)\""
+        } else {
+            userStory = userStoryStaticProperty
         }
 
         guard !userStory.isEmpty else {
             throw MacroError.macroArgumentCannotBeEmpty
         }
 
-        let variable = try VariableDeclSyntax("static let userStory: String = \"\(raw: userStory)\"")
+        let variable = try VariableDeclSyntax("static let userStory: String = \(raw: userStory)")
         
         return [DeclSyntax(variable)]
     }
