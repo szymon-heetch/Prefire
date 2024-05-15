@@ -28,6 +28,13 @@ final class PrefireMacrosTests: XCTestCase {
 
                 static let userStory: String = "HappyPath"
             }
+
+            extension SampleStruct {
+                static func applyUserStory() -> some View {
+                    previews
+                        .previewUserStory(Self.userStory)
+                }
+            }
             """,
             macros: testMacros
         )
@@ -50,6 +57,7 @@ final class PrefireMacrosTests: XCTestCase {
             }
             """,
             diagnostics: [
+                DiagnosticSpec(message: MacroError.macroArgumentCannotBeEmpty.description, line: 1, column: 1),
                 DiagnosticSpec(message: MacroError.macroArgumentCannotBeEmpty.description, line: 1, column: 1)
             ],
             macros: testMacros
@@ -80,6 +88,13 @@ final class PrefireMacrosTests: XCTestCase {
 
                 static let userStory: String = .happyPath
             }
+
+            extension SampleStruct {
+                static func applyUserStory() -> some View {
+                    previews
+                        .previewUserStory(Self.userStory)
+                }
+            }
             """,
             macros: testMacros
         )
@@ -109,6 +124,61 @@ final class PrefireMacrosTests: XCTestCase {
 
                 static let userStory: String = String.happyPath
             }
+
+            extension SampleStruct {
+                static func applyUserStory() -> some View {
+                    previews
+                        .previewUserStory(Self.userStory)
+                }
+            }
+            """,
+            macros: testMacros
+        )
+        #else
+        throw XCTSkip("macros are only supported when running tests for the host platform")
+        #endif
+    }
+
+    func testUserStoryMacroToAddAutomaticSwiftUIModifier() {
+        #if canImport(Macros)
+        assertMacroExpansion(
+            """
+            extension String {
+                static let happyPath: String = "Happy Path"
+            }
+
+            @UserStory(.happyPath)
+            @available(iOS 15.0, *)
+            struct SampleStruct {
+                static var previews: some View {
+                    ItemPreviewView()
+                        .previewLayout(.sizeThatFits)
+                        .customModifier(.customValue)
+                }
+            }
+            """,
+            expandedSource:
+            """
+            extension String {
+                static let happyPath: String = "Happy Path"
+            }
+            @available(iOS 15.0, *)
+            struct SampleStruct {
+                static var previews: some View {
+                    ItemPreviewView()
+                        .previewLayout(.sizeThatFits)
+                        .customModifier(.customValue)
+                }
+
+                static let userStory: String = .happyPath
+            }
+
+            @available(iOS 15.0, *) extension SampleStruct {
+                static func applyUserStory() -> some View {
+                    previews
+                        .previewUserStory(Self.userStory)
+                }
+            }
             """,
             macros: testMacros
         )
@@ -117,3 +187,6 @@ final class PrefireMacrosTests: XCTestCase {
         #endif
     }
 }
+
+
+

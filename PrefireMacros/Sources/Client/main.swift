@@ -1,6 +1,13 @@
 import PrefireMacros
 import SwiftUI
 
+extension View {
+
+    func previewUserStory(_ value: String) -> some View {
+        self
+    }
+}
+
 
 struct ItemPreviewView: View {
     let a = "A"
@@ -41,3 +48,5 @@ print("User story for type: \(Item_Previews.self) is \(Item_Previews.userStory)"
 print("User story for type: \(Item_A_Previews.self) is \(Item_A_Previews.userStory)")
 
 print("User story for type: \(Item_B_Previews.self) is \(Item_B_Previews.userStory)")
+
+
